@@ -1,7 +1,8 @@
+from telebot.types import InlineKeyboardMarkup, ReplyKeyboardRemove
 from telebot import types
 
 
-def quan_hotels_keyboard():
+def quan_hotels_keyboard() -> InlineKeyboardMarkup:
     keyboard = types.InlineKeyboardMarkup()
     one = types.InlineKeyboardButton(text='1', callback_data='a1')
     two = types.InlineKeyboardButton(text='2', callback_data='a2')
@@ -17,7 +18,7 @@ def quan_hotels_keyboard():
     return keyboard
 
 
-def quan_photos_keyboard():
+def quan_photos_keyboard() -> InlineKeyboardMarkup:
     keyboard = types.InlineKeyboardMarkup()
     one = types.InlineKeyboardButton(text='1', callback_data='b1')
     two = types.InlineKeyboardButton(text='2', callback_data='b2')
@@ -33,7 +34,7 @@ def quan_photos_keyboard():
     return keyboard
 
 
-def is_need_photos_keyboard():
+def is_need_photos_keyboard() -> InlineKeyboardMarkup:
     keyboard = types.InlineKeyboardMarkup()
     yes = types.InlineKeyboardButton(text='Да', callback_data='yes')
     no = types.InlineKeyboardButton(text='Нет', callback_data='no')
