@@ -7,7 +7,15 @@ else:
     load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
-RAPID_API_KEY = os.getenv('RAPID_API_KEY')
+headers = {
+    "X-RapidAPI-Key": os.getenv('RAPID_API_KEY'),
+    "X-RapidAPI-Host": "hotels4.p.rapidapi.com"
+}
+
+url = "https://hotels4.p.rapidapi.com/locations/v2/search"
+querystring = {"query": "new york", "locale": "en_US", "currency": "USD"}
+
+
 UI_COMMANDS = (
     ('start', "Запустить бота"),
     ('help', "Вывести справку"),
