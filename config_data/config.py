@@ -12,10 +12,6 @@ headers = {
     "X-RapidAPI-Host": "hotels4.p.rapidapi.com"
 }
 
-url = "https://hotels4.p.rapidapi.com/locations/v2/search"
-querystring = {"query": "new york", "locale": "en_US", "currency": "USD"}
-
-
 UI_COMMANDS = (
     ('start', "Запустить бота"),
     ('help', "Вывести справку"),

@@ -1,9 +1,9 @@
 import requests
 
 
-def request_to_api(url, headers, querystring):
+def main_request(url, headers, params):
     try:
-        response = requests.get(url, headers=headers, params=querystring, timeout=10)
+        response = requests.get(url, headers=headers, params=params, timeout=10)
         if response.status_code == requests.codes.ok:
             return response
     except Exception:  # доделать! пока не понятно

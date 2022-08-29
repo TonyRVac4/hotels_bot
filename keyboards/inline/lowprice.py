@@ -52,3 +52,7 @@ def city_markup(cities) -> InlineKeyboardMarkup:  # : List[Dict[str: str]]
         destinations.add(types.InlineKeyboardButton(text=city['city_name'],
                                                     callback_data=f'{city["city_name"]}{city["destination_id"]}'))
     return destinations
+
+
+
+
