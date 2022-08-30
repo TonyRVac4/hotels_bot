@@ -7,6 +7,7 @@ from states.contact_info import UserInfoState
 from requests_to_api.searchers import city_founding, hotel_founding
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 from utils.misc.sorters import lowprice_sort
+import datetime
 import re
 
 
@@ -52,7 +53,8 @@ def clarification_city(call: CallbackQuery):
                           chat_id=chat_id,
                           message_id=call.message.id)
 
-    calendar, step = DetailedTelegramCalendar(calendar_id=1).build()
+    cur_date = datetime.date.today() + datetime.timedelta(days=1)
+    calendar, step = DetailedTelegramCalendar(calendar_id=1, min_date=cur_date).build()
     bot.send_message(text=f"Выберите дату въезда: {LSTEP[step]}",
                      chat_id=chat_id,
                      reply_markup=calendar)
@@ -63,7 +65,8 @@ def first_calendar_date(call):
     chat_id = call.message.chat.id
     user_id = call.from_user.id
 
-    result, key, step = DetailedTelegramCalendar(calendar_id=1, locale='ru').process(call.data)
+    cur_date = datetime.date.today() + datetime.timedelta(days=1)
+    result, key, step = DetailedTelegramCalendar(calendar_id=1, locale='ru', min_date=cur_date).process(call.data)
     if not result and key:
         bot.edit_message_text(text=f"Выберите дату въезда: {LSTEP[step]}",
                               chat_id=chat_id,
@@ -74,14 +77,15 @@ def first_calendar_date(call):
             data["checkIn"] = result
             bot.set_state(user_id=user_id, state=UserInfoState.checkOut, chat_id=chat_id)
 
-        bot.edit_message_text(text=f"Дата въезда: {result}",
-                              chat_id=chat_id,
-                              message_id=call.message.message_id)
-
-        calendar, step = DetailedTelegramCalendar(calendar_id=2).build()
-        bot.send_message(text=f"Выберите дату выезда: {LSTEP[step]}",
-                         chat_id=chat_id,
-                         reply_markup=calendar)
+            bot.edit_message_text(text=f"Дата въезда: {result}",
+                                  chat_id=chat_id,
+                                  message_id=call.message.message_id)
+            year, mouth, day = map(int, str(result).split("-"))
+            date = datetime.date(year, mouth, day) + datetime.timedelta(days=1)
+            calendar, step = DetailedTelegramCalendar(calendar_id=2, min_date=date).build()
+            bot.send_message(text=f"Выберите дату выезда: {LSTEP[step]}",
+                             chat_id=chat_id,
+                             reply_markup=calendar)
 
 
 @bot.callback_query_handler(func=DetailedTelegramCalendar.func(calendar_id=2))
@@ -89,7 +93,10 @@ def second_calendar_date(call):
     chat_id = call.message.chat.id
     user_id = call.from_user.id
 
-    result, key, step = DetailedTelegramCalendar(calendar_id=2, locale='ru').process(call.data)
+    with bot.retrieve_data(user_id=user_id, chat_id=chat_id) as data:
+        year, mouth, day = map(int, str(data["checkIn"]).split("-"))
+        date = datetime.date(year, mouth, day) + datetime.timedelta(days=1)
+        result, key, step = DetailedTelegramCalendar(calendar_id=2, locale='ru', min_date=date).process(call.data)
     if not result and key:
         bot.edit_message_text(text=f"Выберите дату выезда: {LSTEP[step]}",
                               chat_id=chat_id,
