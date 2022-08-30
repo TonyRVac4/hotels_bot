@@ -45,6 +45,7 @@ def clarification_city(call: CallbackQuery):
         call_data = re.search(pattern, call.data)
         data["city"] = call_data.group(1)
         data["dest_id"] = call_data.group(2)
+
         bot.set_state(user_id=user_id, state=UserInfoState.checkIn, chat_id=chat_id)
 
     bot.edit_message_text(text=f"Город: {call_data.group(1)}",
@@ -140,7 +141,7 @@ def need_photos(call: CallbackQuery):
         with bot.retrieve_data(call.from_user.id, chat_id) as data:
             data["need_photos"] = False
             data["quan_photo"] = 0
-        bot.register_next_step_handler(call.message, find_hotels)
+        find_hotels(call)
 
 
 @bot.callback_query_handler(func=lambda call: call.data in lowprice_calldata.quan_photos_callback_data())
@@ -149,31 +150,27 @@ def quan_photos(call: CallbackQuery):
 
     with bot.retrieve_data(call.from_user.id, chat_id) as data:
         data["quan_photo"] = int(call.data[1])
-    # не переходит дальше
+    find_hotels(call)
 
 
-@bot.message_handler(content_types="text")
-def find_hotels(message):
-    print(124)
-    chat_id = message.chat.id
-    with bot.retrieve_data(message.from_user.id, chat_id) as data:
-        bot.edit_message_text(text="Вы завершили регистрацию",
+def find_hotels(call):
+    chat_id = call.message.chat.id
+
+    with bot.retrieve_data(call.from_user.id, chat_id) as data:
+        bot.edit_message_text(text="Ожидайте, подбираем отели...",
                               chat_id=chat_id,
-                              message_id=message.message_id,
+                              message_id=call.message.message_id,
                               reply_markup=None)
-        bot.send_message(text="Ожидайте, подбираем отели...", chat_id=chat_id)
-
         hotels = hotel_founding(id=data["dest_id"],
                                 checkIn=data["checkIn"],
                                 checkOut=data["checkOut"],
                                 quan_hotels=data["quan_hotels"],
                                 sorting=lowprice_sort)
 
-    if hotels:
-        bot.edit_message_text(text="Вот что удалось найти:",
-                              chat_id=chat_id,
-                              message_id=message.message_id,
-                              reply_markup=None)
-    else:
-        bot.send_message(text="Отели не найдены",
-                         chat_id=chat_id)
+        if hotels:
+            bot.edit_message_text(text=f"Вот что удалось найти:",
+                                  chat_id=chat_id,
+                                  message_id=call.message.message_id)
+        else:
+            bot.send_message(text="Отели не найдены",
+                             chat_id=chat_id)

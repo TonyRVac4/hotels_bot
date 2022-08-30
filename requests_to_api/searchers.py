@@ -2,7 +2,6 @@ from config_data.config import headers
 from requests_to_api.api_request import main_request
 import re
 import json
-from states.contact_info import UserInfoState
 
 
 def city_founding(city):
@@ -18,12 +17,12 @@ def city_founding(city):
             cities = list()
             for dest_id in suggestions['entities']:
                 cities.append({'city_name': dest_id['name'], 'destination_id': dest_id['destinationId']})
+            else:
+                return cities
         else:
             raise Exception
     except Exception:
         return None
-    else:
-        return cities
 
 
 def hotel_founding(id, checkIn, checkOut, quan_hotels, sorting):
@@ -47,13 +46,11 @@ def hotel_founding(id, checkIn, checkOut, quan_hotels, sorting):
                                    'full_price': i_hotel['ratePlan']['price']['fullyBundledPricePerStay'],
                                    'destination_id': i_hotel['id']})
                 else:
-                    break
+                    return hotels
         else:
             raise Exception
     except Exception:
         return None
-    else:
-        return hotels
 
 
 photos_url = "https://hotels4.p.rapidapi.com/properties/get-hotel-photos"
