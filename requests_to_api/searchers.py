@@ -20,8 +20,8 @@ def city_founding(city):
             else:
                 return cities
         else:
-            raise Exception
-    except Exception:
+            raise ValueError
+    except ValueError:
         return None
 
 
@@ -36,22 +36,50 @@ def hotel_founding(id, checkIn, checkOut, quan_hotels, sorting):
         find = re.search(pattern, response.text)
         if find:
             data = json.loads(f"{{{find[0]}}}")
+            write_to_json(data=data, file_name="hotels.json")
             hotels = list()
             sorted_data = sorting(data['results'])
-            for count, i_hotel in enumerate(sorted_data):
-                if count < quan_hotels:
+            if len(sorted_data) <= quan_hotels:
+                for i_hotel in sorted_data:
                     hotels.append({'hotel_name': i_hotel['name'],
-                                   'address': i_hotel['address']['streetAddress'], # добавить: как далеко расположен от центра
+                                   'address': i_hotel['address']['streetAddress'],
+                                   # добавить: как далеко расположен от центра
                                    'price_per_day': i_hotel['ratePlan']['price']['current'],
                                    'full_price': i_hotel['ratePlan']['price']['fullyBundledPricePerStay'],
                                    'destination_id': i_hotel['id']})
-                else:
-                    return hotels
+            else:
+                for count, i_hotel in enumerate(sorted_data):
+                    if count < quan_hotels:
+                        hotels.append({'hotel_name': i_hotel['name'],
+                                       'address': i_hotel['address']['streetAddress'],
+                                       # добавить: как далеко расположен от центра
+                                       'price_per_day': i_hotel['ratePlan']['price']['current'],
+                                       'full_price': i_hotel['ratePlan']['price']['fullyBundledPricePerStay'],
+                                       'destination_id': i_hotel['id']})
+                    else:
+                        break
+            return hotels
         else:
-            raise Exception
-    except Exception:
+            raise ValueError
+    except ValueError:
         return None
 
 
-photos_url = "https://hotels4.p.rapidapi.com/properties/get-hotel-photos"
-photos_querystring = {"id": str}  # id отеля
+def find_photos(id: str):
+    url = "https://hotels4.p.rapidapi.com/properties/get-hotel-photos"
+    querystring = {"id": id}
+    headers = {
+        "X-RapidAPI-Key": "69aaf56f35msh5d3268f39585685p13490ejsnc32dc9dc8623",
+        "X-RapidAPI-Host": "hotels4.p.rapidapi.com"
+    }
+    try:
+        response = main_request(url=url, headers=headers, params=querystring)
+        data = json.loads(response.text)
+        write_to_json(data=data, file_name="photos.json")
+    except Exception:
+        pass
+
+
+def write_to_json(data, file_name: str):
+    with open(file_name, "w") as file:
+        json.dump(data, file, indent=4)
