@@ -4,11 +4,12 @@ from keyboards.inline import lowprice
 from keyboards.inline import lowprice_calldata
 from telebot.types import CallbackQuery
 from states.contact_info import UserInfoState
-from requests_to_api.searchers import city_founding, hotel_founding
+from requests_to_api.searchers import find_cites, find_hotels, find_photos
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 from utils.misc.sorters import lowprice_sort
 import datetime
 import re
+from telebot import types
 
 
 @bot.message_handler(commands=['lowprice'])
@@ -25,7 +26,7 @@ def get_city(message: Message):
     chat_id = message.chat.id
     text = message.text
 
-    cities = city_founding(city=text)
+    cities = find_cites(city=text)
     if cities:
         bot.set_state(user_id=message.from_user.id, state=UserInfoState.city, chat_id=chat_id)
         bot.send_message(text=f"Уточните, пожалуйста: {text}",
@@ -121,7 +122,10 @@ def get_num_hotels(call: CallbackQuery):
     user_id = call.from_user.id
 
     with bot.retrieve_data(user_id, chat_id) as data:
-        data["quan_hotels"] = int(call.data[1])
+        if len(call.data) == 3:
+            data["quan_hotels"] = int(call.data[1] + call.data[2])
+        else:
+            data["quan_hotels"] = int(call.data[1])
         bot.set_state(user_id, UserInfoState.need_photo, chat_id)
 
     bot.edit_message_text(text="Нужно-ли выводить фотографий для каждого отеля («Да/Нет»)",
@@ -137,7 +141,7 @@ def need_photos(call: CallbackQuery):
 
     if text == "yes":
         with bot.retrieve_data(call.from_user.id, chat_id) as data:
-            data["need_photos"] = True
+            data["need_photo"] = True
             bot.set_state(call.from_user.id, UserInfoState.quan_photo, chat_id)
 
         bot.edit_message_text(text="Сколько фото нужно?",
@@ -146,9 +150,9 @@ def need_photos(call: CallbackQuery):
                               reply_markup=lowprice.quan_photos_keyboard())
     elif text == "no":
         with bot.retrieve_data(call.from_user.id, chat_id) as data:
-            data["need_photos"] = False
+            data["need_photo"] = False
             data["quan_photo"] = 0
-        find_hotels(call)
+        final_data_handler(call)
 
 
 @bot.callback_query_handler(func=lambda call: call.data in lowprice_calldata.quan_photos_callback_data())
@@ -156,11 +160,14 @@ def quan_photos(call: CallbackQuery):
     chat_id = call.message.chat.id
 
     with bot.retrieve_data(call.from_user.id, chat_id) as data:
-        data["quan_photo"] = int(call.data[1])
-    find_hotels(call)
+        if len(call.data) == 3:
+            data["quan_photo"] = int(call.data[1] + call.data[2])
+        else:
+            data["quan_photo"] = int(call.data[1])
+    final_data_handler(call)
 
 
-def find_hotels(call):
+def final_data_handler(call):
     chat_id = call.message.chat.id
 
     with bot.retrieve_data(call.from_user.id, chat_id) as data:
@@ -168,16 +175,45 @@ def find_hotels(call):
                               chat_id=chat_id,
                               message_id=call.message.message_id,
                               reply_markup=None)
-        hotels = hotel_founding(id=data["dest_id"],
-                                checkIn=data["checkIn"],
-                                checkOut=data["checkOut"],
-                                quan_hotels=data["quan_hotels"],
-                                sorting=lowprice_sort)
+        hotels = find_hotels(id=data["dest_id"],
+                             checkIn=data["checkIn"],
+                             checkOut=data["checkOut"],
+                             quan_hotels=data["quan_hotels"],
+                             sorting=lowprice_sort)
 
         if hotels:
             bot.edit_message_text(text=f"Вот что удалось найти:",
                                   chat_id=chat_id,
                                   message_id=call.message.message_id)
+
+            if data["need_photo"]:
+                for hotel in hotels:
+                    full_price = hotel["full_price"].split(" ")
+                    quan_day = re.match(r"\d+", full_price[3])
+                    quan_day = quan_day.group()
+                    message = "Отель: {}\nАдрес: {}\n" \
+                              "Стоимость за сутки: {}\nСтоимость за {} суток: {}".format(hotel["hotel_name"],
+                                                                                         hotel["address"],
+                                                                                         hotel["price_per_day"],
+                                                                                         quan_day,
+                                                                                         full_price[1])
+                    photos = find_photos(hotel=hotel, quan_photo=data["quan_photo"])
+                    if len(photos) >= 2:
+                        photos_for_send = [types.InputMediaPhoto(media=path) for path in photos]
+                        bot.send_media_group(chat_id=chat_id, media=photos_for_send)
+                        bot.send_message(text=message, chat_id=chat_id)
+                    else:
+                        bot.send_photo(chat_id=chat_id, photo=photos[0], caption=message)
+            else:
+                for hotel in hotels:
+                    full_price = hotel["full_price"].split(" ")
+                    message = "Отель: {}\nАдрес: {}\n" \
+                              "Стоимость за сутки: {}\nСтоимость за {} суток: {}".format(hotel["hotel_name"],
+                                                                                         hotel["address"],
+                                                                                         hotel["price_per_day"],
+                                                                                         full_price[3][0],
+                                                                                         full_price[1])
+                    bot.send_message(text=message, chat_id=chat_id)
         else:
             bot.send_message(text="Отели не найдены",
                              chat_id=chat_id)
