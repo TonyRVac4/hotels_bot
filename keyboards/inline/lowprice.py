@@ -1,5 +1,5 @@
-from telebot.types import InlineKeyboardMarkup
 from telebot import types
+from telebot.types import InlineKeyboardMarkup
 from keyboards.inline.lowprice_calldata import city_markup_callback_data
 
 

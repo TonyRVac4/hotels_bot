@@ -1,7 +1,7 @@
-from config_data.config import headers
-from requests_to_api.api_request import main_request
 import re
 import json
+from config_data.config import headers
+from requests_to_api.api_request import main_request
 
 
 def find_cites(city):
