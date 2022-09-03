@@ -37,8 +37,8 @@ def quan_photos_keyboard() -> InlineKeyboardMarkup:
 
 def is_need_photos_keyboard() -> InlineKeyboardMarkup:
     keyboard = types.InlineKeyboardMarkup()
-    yes = types.InlineKeyboardButton(text='Да', callback_data='yes')
-    no = types.InlineKeyboardButton(text='Нет', callback_data='no')
+    yes = types.InlineKeyboardButton(text='Да', callback_data='yes1')
+    no = types.InlineKeyboardButton(text='Нет', callback_data='no1')
     keyboard.add(yes, no)
     return keyboard
 
@@ -48,9 +48,9 @@ def city_markup(cities) -> InlineKeyboardMarkup:  # : List[Dict[str: str]]
 
     city_markup_callback_data.clear()
     for city in cities:
-        city_markup_callback_data.append(f'{city["city_name"]}{city["destination_id"]}')
+        city_markup_callback_data.append(f'{city["city_name"]}{city["destination_id"]}lowprice')
         destinations.add(types.InlineKeyboardButton(text=city['city_name'],
-                                                    callback_data=f'{city["city_name"]}{city["destination_id"]}'))
+                                                    callback_data=f'{city["city_name"]}{city["destination_id"]}lowprice'))
     return destinations
 
 
