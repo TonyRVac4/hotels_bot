@@ -1,4 +1,4 @@
-city_markup_callback_data = list()
+lowprice_city_callback_data = list()
 
 
 def is_need_photos_callback_data() -> list:

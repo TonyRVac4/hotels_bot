@@ -6,7 +6,6 @@ def main_request(url, headers, params):
         response = requests.get(url, headers=headers, params=params, timeout=10)
         if response.status_code == requests.codes.ok:
             return response
-        else:
-            raise Exception
-    except Exception:
+        raise Exception
+    except:
         return ""

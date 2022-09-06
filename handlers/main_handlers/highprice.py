@@ -15,7 +15,7 @@ from utils.misc.sorters import highprice_sort
 @bot.message_handler(commands=['highprice'])
 def high_price(message: Message):
     chat_id = message.chat.id
-    print(1)
+
     bot.send_message(text="Введите на русском Город, где хотите найти отель:",
                      chat_id=chat_id)
     bot.register_next_step_handler(message, highprice_get_city)
@@ -25,7 +25,7 @@ def high_price(message: Message):
 def highprice_get_city(message: Message):
     chat_id = message.chat.id
     text = message.text
-    print(2)
+
     cities = find_cites(city=text)
     if cities:
         bot.set_state(user_id=message.from_user.id, state=UserInfoState.city, chat_id=chat_id)
@@ -38,13 +38,13 @@ def highprice_get_city(message: Message):
         bot.register_next_step_handler(message, highprice_get_city)
 
 
-@bot.callback_query_handler(func=lambda call: call.data in highprice_calldata.city_markup_callback_data)
+@bot.callback_query_handler(func=lambda call: call.data in highprice_calldata.highprice_city_callback_data)
 def highprice_clarification_city(call: CallbackQuery):
     chat_id = call.message.chat.id
     user_id = call.from_user.id
-    print(3)
+
     with bot.retrieve_data(user_id=user_id, chat_id=chat_id) as data:
-        pattern = r"([а-яА-Яa-zA-Z].+[а-яА-Яa-zA-Z])(\d{6,8})"
+        pattern = r"([а-яА-Яa-zA-Z].+[а-яА-Яa-zA-Z])(\d{1,10})"
         call_data = re.search(pattern, call.data)
         data["city"] = call_data.group(1)
         data["dest_id"] = call_data.group(2)
@@ -66,7 +66,7 @@ def highprice_clarification_city(call: CallbackQuery):
 def highprice_first_calendar_date(call):
     chat_id = call.message.chat.id
     user_id = call.from_user.id
-    print(4)
+
     cur_date = datetime.date.today() + datetime.timedelta(days=1)
     result, key, step = DetailedTelegramCalendar(calendar_id=3, locale='ru', min_date=cur_date).process(call.data)
     if not result and key:
@@ -94,7 +94,7 @@ def highprice_first_calendar_date(call):
 def highprice_second_calendar_date(call):
     chat_id = call.message.chat.id
     user_id = call.from_user.id
-    print(5)
+
     with bot.retrieve_data(user_id=user_id, chat_id=chat_id) as data:
         year, mouth, day = map(int, str(data["checkIn"]).split("-"))
         date = datetime.date(year, mouth, day) + datetime.timedelta(days=1)
@@ -121,7 +121,7 @@ def highprice_second_calendar_date(call):
 def highprice_get_num_hotels(call: CallbackQuery):
     chat_id = call.message.chat.id
     user_id = call.from_user.id
-    print(6)
+
     with bot.retrieve_data(user_id, chat_id) as data:
         if len(call.data) == 3:
             data["quan_hotels"] = int(call.data[1] + call.data[2])
@@ -139,7 +139,7 @@ def highprice_get_num_hotels(call: CallbackQuery):
 def highprice_need_photos(call: CallbackQuery):
     chat_id = call.message.chat.id
     text = call.data
-    print(7)
+
     if text == "yes2":
         with bot.retrieve_data(call.from_user.id, chat_id) as data:
             data["need_photo"] = True
@@ -159,7 +159,7 @@ def highprice_need_photos(call: CallbackQuery):
 @bot.callback_query_handler(func=lambda call: call.data in highprice_calldata.quan_photos_callback_data())
 def highprice_quan_photos(call: CallbackQuery):
     chat_id = call.message.chat.id
-    print(8)
+
     with bot.retrieve_data(call.from_user.id, chat_id) as data:
         if len(call.data) == 3:
             data["quan_photo"] = int(call.data[1] + call.data[2])
@@ -170,7 +170,6 @@ def highprice_quan_photos(call: CallbackQuery):
 
 def final_highprice_data_handler(call):
     chat_id = call.message.chat.id
-    print(9)
 
     with bot.retrieve_data(call.from_user.id, chat_id) as data:
         bot.edit_message_text(text="Ожидайте, подбираем отели...",

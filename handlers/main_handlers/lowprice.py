@@ -38,13 +38,13 @@ def get_city(message: Message):
         bot.register_next_step_handler(message, get_city)
 
 
-@bot.callback_query_handler(func=lambda call: call.data in lowprice_calldata.city_markup_callback_data)
+@bot.callback_query_handler(func=lambda call: call.data in lowprice_calldata.lowprice_city_callback_data)
 def clarification_city(call: CallbackQuery):
     chat_id = call.message.chat.id
     user_id = call.from_user.id
 
     with bot.retrieve_data(user_id=user_id, chat_id=chat_id) as data:
-        pattern = r"([а-яА-Яa-zA-Z].+[а-яА-Яa-zA-Z])(\d{6,8})"
+        pattern = r"([а-яА-Яa-zA-Z].+[а-яА-Яa-zA-Z])(\d{1,10})"
         call_data = re.search(pattern, call.data)
         data["city"] = call_data.group(1)
         data["dest_id"] = call_data.group(2)
