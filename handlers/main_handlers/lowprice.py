@@ -9,7 +9,6 @@ from keyboards.inline import lowprice
 from keyboards.inline import lowprice_calldata
 from states.contact_info import UserInfoState
 from requests_to_api.searchers import find_cites, find_hotels, find_photos
-from utils.misc.sorters import lowprice_sort
 
 
 @bot.message_handler(commands=['lowprice'])
@@ -180,7 +179,7 @@ def final_data_handler(call):
                              checkIn=data["checkIn"],
                              checkOut=data["checkOut"],
                              quan_hotels=data["quan_hotels"],
-                             sorting=lowprice_sort)
+                             sorting="PRICE")
 
         if hotels:
             bot.edit_message_text(text=f"Вот что удалось найти:",
