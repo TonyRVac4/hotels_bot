@@ -51,25 +51,24 @@ def find_hotels(id, checkIn, checkOut, quan_hotels, sorting):
             data = json.loads(f"{{{find[0]}}}")
             if data['results']:
                 hotels = list()
-                if len(data['results']) <= quan_hotels:
+                if len(data['results']) >= quan_hotels:
                     for i_hotel in data['results']:
-                        hotels.append({"hotel_name": i_hotel["name"],
-                                       "address": i_hotel['address']['streetAddress'],
-                                       # добавить: как далеко расположен от центра
-                                       "price_per_day": i_hotel["ratePlan"]["price"]["current"],
-                                       "full_price": i_hotel["ratePlan"]["price"]["fullyBundledPricePerStay"],
-                                       "destination_id": i_hotel["id"]})
-                else:
-                    for count, i_hotel in enumerate(data['results']):
-                        if count < quan_hotels:
+                        if len(hotels) < quan_hotels and "streetAddress" in i_hotel["address"].keys():
                             hotels.append({"hotel_name": i_hotel["name"],
-                                           "address": i_hotel['address']['streetAddress'],
+                                           "address": i_hotel["address"]["streetAddress"],
                                            # добавить: как далеко расположен от центра
                                            "price_per_day": i_hotel["ratePlan"]["price"]["current"],
                                            "full_price": i_hotel["ratePlan"]["price"]["fullyBundledPricePerStay"],
                                            "destination_id": i_hotel["id"]})
-                        else:
-                            break
+                else:
+                    for i_hotel in data['results']:
+                        if i_hotel["address"]["streetAddress"]:
+                            hotels.append({"hotel_name": i_hotel["name"],
+                                           "address": i_hotel["address"]["streetAddress"],
+                                           # добавить: как далеко расположен от центра
+                                           "price_per_day": i_hotel["ratePlan"]["price"]["current"],
+                                           "full_price": i_hotel["ratePlan"]["price"]["fullyBundledPricePerStay"],
+                                           "destination_id": i_hotel["id"]})
                 return hotels
             else:
                 raise ValueError(f"Ошибка поиска отелей\n"

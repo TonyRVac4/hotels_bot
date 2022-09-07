@@ -50,7 +50,7 @@ def highprice_clarification_city(call: CallbackQuery):
 
         bot.set_state(user_id=user_id, state=UserInfoState.checkIn, chat_id=chat_id)
 
-    bot.edit_message_text(text=f"Город: {call_data.group(1)}",
+    bot.edit_message_text(text=f"Район: {call_data.group(1)}",
                           chat_id=chat_id,
                           message_id=call.message.id)
 
@@ -175,6 +175,7 @@ def final_highprice_data_handler(call):
                               chat_id=chat_id,
                               message_id=call.message.message_id,
                               reply_markup=None)
+
         hotels = find_hotels(id=data["dest_id"],
                              checkIn=data["checkIn"],
                              checkOut=data["checkOut"],
