@@ -20,7 +20,14 @@ def find_cites(city):
             if suggestions != {'entities': []}:
                 cities = list()
                 for dest_id in suggestions['entities']:
-                    cities.append({'city_name': dest_id['name'], 'destination_id': dest_id['destinationId']})
+                    caption = dest_id["caption"].split(", ")
+                    city_name = dest_id['name']
+                    if len(city_name) < 30:
+                        if len(f"{city_name} - {caption[-2]}") < 30:
+                            city_name += f" - {caption[-2]}"
+                            if len(f"{city_name} {caption[-1]}") < 30:
+                                city_name += f" {caption[-1]}"
+                        cities.append({'city_name': city_name, 'destination_id': dest_id['destinationId']})
                 else:
                     return cities
             else:
