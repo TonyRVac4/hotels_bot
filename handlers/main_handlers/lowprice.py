@@ -206,9 +206,9 @@ def final_data_handler(call):
                     if len(photos) >= 2:
                         photos_for_send = [types.InputMediaPhoto(media=path) for path in photos]
                         bot.send_media_group(chat_id=chat_id, media=photos_for_send)
-                        bot.send_message(text=message, chat_id=chat_id)
+                        bot.send_message(text=message, chat_id=chat_id, disable_web_page_preview=True)
                     else:
-                        bot.send_photo(chat_id=chat_id, photo=photos[0], caption=message)
+                        bot.send_photo(chat_id=chat_id, photo=photos[0], caption=message, disable_web_page_preview=True)
             else:
                 for hotel in hotels:
                     hotel_url = 'https://hotels.com/ho{hotel_id}'.replace("{hotel_id}", str(hotel["destination_id"]))
@@ -225,7 +225,7 @@ def final_data_handler(call):
                                                                quan_day=quan_day,
                                                                full_price=full_price[1],
                                                                site=hotel_url)
-                    bot.send_message(text=message, chat_id=chat_id)
+                    bot.send_message(text=message, chat_id=chat_id, disable_web_page_preview=True)
         else:
             bot.send_message(text="Отели не найдены",
                              chat_id=chat_id)

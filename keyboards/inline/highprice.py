@@ -49,8 +49,7 @@ def city_markup(cities) -> InlineKeyboardMarkup:  # : List[Dict[str: str]]
     highprice_city_callback_data.clear()
     for city in cities:
         call_data = f'2{city["city_name"]}{city["destination_id"]}'
-        if len(city['city_name']) <= 21:
-            highprice_city_callback_data.append(call_data)
-            destinations.add(types.InlineKeyboardButton(text=city['city_name'],
-                                                        callback_data=call_data))
+        highprice_city_callback_data.append(call_data)
+        destinations.add(types.InlineKeyboardButton(text=city['city_name'],
+                                                    callback_data=call_data))
     return destinations
