@@ -5,23 +5,23 @@ from telebot.types import Message
 from telebot.types import CallbackQuery
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 from loader import bot
-from keyboards.inline import lowprice
-from keyboards.inline import lowprice_calldata
+from keyboards.inline import highprice
+from keyboards.inline import highprice_calldata
 from states.contact_info import UserInfoState
 from requests_to_api.searchers import find_cites, find_hotels, find_photos
 
 
-@bot.message_handler(commands=['lowprice'])
-def low_price(message: Message):
+@bot.message_handler(commands=['highprice'])
+def high_price(message: Message):
     chat_id = message.chat.id
 
     bot.send_message(text="Введите на русском Город, где хотите найти отель:",
                      chat_id=chat_id)
-    bot.register_next_step_handler(message, get_city)
+    bot.register_next_step_handler(message, highprice_get_city)
 
 
-@bot.message_handler(commands=['871306398239'])
-def get_city(message: Message):
+@bot.message_handler(commands=['9757576487'])
+def highprice_get_city(message: Message):
     chat_id = message.chat.id
     text = message.text
 
@@ -30,15 +30,15 @@ def get_city(message: Message):
         bot.set_state(user_id=message.from_user.id, state=UserInfoState.city, chat_id=chat_id)
         bot.send_message(text=f"Уточните, пожалуйста: {text}",
                          chat_id=chat_id,
-                         reply_markup=lowprice.city_markup(cities))
+                         reply_markup=highprice.city_markup(cities))
     else:
         bot.send_message(text="Город не найден!\nВведите на русском Город, где хотите найти отель:",
                          chat_id=chat_id)
-        bot.register_next_step_handler(message, get_city)
+        bot.register_next_step_handler(message, highprice_get_city)
 
 
-@bot.callback_query_handler(func=lambda call: call.data in lowprice_calldata.lowprice_city_callback_data)
-def clarification_city(call: CallbackQuery):
+@bot.callback_query_handler(func=lambda call: call.data in highprice_calldata.highprice_city_callback_data)
+def highprice_clarification_city(call: CallbackQuery):
     chat_id = call.message.chat.id
     user_id = call.from_user.id
 
@@ -55,19 +55,19 @@ def clarification_city(call: CallbackQuery):
                           message_id=call.message.id)
 
     cur_date = datetime.date.today() + datetime.timedelta(days=1)
-    calendar, step = DetailedTelegramCalendar(calendar_id=1, min_date=cur_date).build()
+    calendar, step = DetailedTelegramCalendar(calendar_id=3, min_date=cur_date).build()
     bot.send_message(text=f"📅️↙️Выберите дату въезда: {LSTEP[step]}",
                      chat_id=chat_id,
                      reply_markup=calendar)
 
 
-@bot.callback_query_handler(func=DetailedTelegramCalendar.func(calendar_id=1))
-def first_calendar_date(call):
+@bot.callback_query_handler(func=DetailedTelegramCalendar.func(calendar_id=3))
+def highprice_first_calendar_date(call):
     chat_id = call.message.chat.id
     user_id = call.from_user.id
 
     cur_date = datetime.date.today() + datetime.timedelta(days=1)
-    result, key, step = DetailedTelegramCalendar(calendar_id=1, locale='ru', min_date=cur_date).process(call.data)
+    result, key, step = DetailedTelegramCalendar(calendar_id=3, locale='ru', min_date=cur_date).process(call.data)
     if not result and key:
         bot.edit_message_text(text=f"📅️↙️Выберите дату въезда: {LSTEP[step]}",
                               chat_id=chat_id,
@@ -83,21 +83,21 @@ def first_calendar_date(call):
                                   message_id=call.message.message_id)
             year, mouth, day = map(int, str(result).split("-"))
             date = datetime.date(year, mouth, day) + datetime.timedelta(days=1)
-            calendar, step = DetailedTelegramCalendar(calendar_id=2, min_date=date).build()
+            calendar, step = DetailedTelegramCalendar(calendar_id=4, min_date=date).build()
             bot.send_message(text=f"📅️↗️Выберите дату выезда: {LSTEP[step]}",
                              chat_id=chat_id,
                              reply_markup=calendar)
 
 
-@bot.callback_query_handler(func=DetailedTelegramCalendar.func(calendar_id=2))
-def second_calendar_date(call):
+@bot.callback_query_handler(func=DetailedTelegramCalendar.func(calendar_id=4))
+def highprice_second_calendar_date(call):
     chat_id = call.message.chat.id
     user_id = call.from_user.id
 
     with bot.retrieve_data(user_id=user_id, chat_id=chat_id) as data:
         year, mouth, day = map(int, str(data["checkIn"]).split("-"))
         date = datetime.date(year, mouth, day) + datetime.timedelta(days=1)
-        result, key, step = DetailedTelegramCalendar(calendar_id=2, locale='ru', min_date=date).process(call.data)
+        result, key, step = DetailedTelegramCalendar(calendar_id=4, locale='ru', min_date=date).process(call.data)
     if not result and key:
         bot.edit_message_text(text=f"📅️↗️Выберите дату выезда: {LSTEP[step]}",
                               chat_id=chat_id,
@@ -113,11 +113,11 @@ def second_calendar_date(call):
                               message_id=call.message.message_id)
         bot.send_message(text=f"Введите кол-во отелей, которые необходимо вывести: ",
                          chat_id=chat_id,
-                         reply_markup=lowprice.quan_hotels_keyboard())
+                         reply_markup=highprice.quan_hotels_keyboard())
 
 
-@bot.callback_query_handler(func=lambda call: call.data in lowprice_calldata.quan_hotels_callback_data())
-def get_num_hotels(call: CallbackQuery):
+@bot.callback_query_handler(func=lambda call: call.data in highprice_calldata.quan_hotels_callback_data())
+def highprice_get_num_hotels(call: CallbackQuery):
     chat_id = call.message.chat.id
     user_id = call.from_user.id
 
@@ -131,15 +131,15 @@ def get_num_hotels(call: CallbackQuery):
     bot.edit_message_text(text="Нужно-ли выводить фотографий для каждого отеля («Да/Нет»)",
                           chat_id=chat_id,
                           message_id=call.message.message_id,
-                          reply_markup=lowprice.is_need_photos_keyboard())
+                          reply_markup=highprice.is_need_photos_keyboard())
 
 
-@bot.callback_query_handler(func=lambda call: call.data in lowprice_calldata.is_need_photos_callback_data())
-def need_photos(call: CallbackQuery):
+@bot.callback_query_handler(func=lambda call: call.data in highprice_calldata.is_need_photos_callback_data())
+def highprice_need_photos(call: CallbackQuery):
     chat_id = call.message.chat.id
     text = call.data
 
-    if text == "yes1":
+    if text == "yes2":
         with bot.retrieve_data(call.from_user.id, chat_id) as data:
             data["need_photo"] = True
             bot.set_state(call.from_user.id, UserInfoState.quan_photo, chat_id)
@@ -147,16 +147,16 @@ def need_photos(call: CallbackQuery):
         bot.edit_message_text(text="Сколько фото нужно?",
                               chat_id=chat_id,
                               message_id=call.message.message_id,
-                              reply_markup=lowprice.quan_photos_keyboard())
-    elif text == "no1":
+                              reply_markup=highprice.quan_photos_keyboard())
+    elif text == "no2":
         with bot.retrieve_data(call.from_user.id, chat_id) as data:
             data["need_photo"] = False
             data["quan_photo"] = 0
-        final_data_handler(call)
+        final_highprice_data_handler(call)
 
 
-@bot.callback_query_handler(func=lambda call: call.data in lowprice_calldata.quan_photos_callback_data())
-def quan_photos(call: CallbackQuery):
+@bot.callback_query_handler(func=lambda call: call.data in highprice_calldata.quan_photos_callback_data())
+def highprice_quan_photos(call: CallbackQuery):
     chat_id = call.message.chat.id
 
     with bot.retrieve_data(call.from_user.id, chat_id) as data:
@@ -164,10 +164,10 @@ def quan_photos(call: CallbackQuery):
             data["quan_photo"] = int(call.data[1] + call.data[2])
         else:
             data["quan_photo"] = int(call.data[1])
-    final_data_handler(call)
+    final_highprice_data_handler(call)
 
 
-def final_data_handler(call):
+def final_highprice_data_handler(call):
     chat_id = call.message.chat.id
 
     with bot.retrieve_data(call.from_user.id, chat_id) as data:
@@ -175,11 +175,12 @@ def final_data_handler(call):
                               chat_id=chat_id,
                               message_id=call.message.message_id,
                               reply_markup=None)
+
         hotels = find_hotels(id=data["dest_id"],
                              checkIn=data["checkIn"],
                              checkOut=data["checkOut"],
                              quan_hotels=data["quan_hotels"],
-                             sorting="PRICE")
+                             sorting="PRICE_HIGHEST_FIRST")
 
         if hotels:
             bot.edit_message_text(text=f"Вот что удалось найти:",
