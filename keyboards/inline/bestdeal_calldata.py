@@ -2,15 +2,15 @@ city_callback_data = list()
 
 
 def is_need_photos_callback_data() -> list:
-    data = ["yes1", "no1"]
+    data = ["yes3", "no3"]
     return data
 
 
 def quan_hotels_callback_data() -> list:
-    data = ["a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10"]
+    data = ["e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10"]
     return data
 
 
 def quan_photos_callback_data() -> list:
-    data = ["b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10"]
+    data = ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10"]
     return data

@@ -5,12 +5,12 @@ from telebot.types import Message
 from telebot.types import CallbackQuery
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 from loader import bot
-from keyboards.inline import highprice, highprice_calldata
+from keyboards.inline import bestdeal, bestdeal_calldata
 from states.contact_info import UserInfoState
 from requests_to_api.searchers import find_cites, find_hotels, find_photos
 
 
-@bot.message_handler(commands=['highprice'])
+@bot.message_handler(commands=['bestdeal'])
 def high_price(message: Message):
     chat_id = message.chat.id
 
@@ -19,7 +19,7 @@ def high_price(message: Message):
     bot.register_next_step_handler(message, highprice_get_city)
 
 
-@bot.message_handler(commands=['9757576487'])
+@bot.message_handler(commands=['8675396858'])
 def highprice_get_city(message: Message):
     chat_id = message.chat.id
     text = message.text
@@ -29,14 +29,14 @@ def highprice_get_city(message: Message):
         bot.set_state(user_id=message.from_user.id, state=UserInfoState.city, chat_id=chat_id)
         bot.send_message(text=f"Уточните, пожалуйста: {text}",
                          chat_id=chat_id,
-                         reply_markup=highprice.city_markup(cities))
+                         reply_markup=bestdeal.city_markup(cities))
     else:
         bot.send_message(text="Город не найден!\nВведите на русском Город, где хотите найти отель:",
                          chat_id=chat_id)
         bot.register_next_step_handler(message, highprice_get_city)
 
 
-@bot.callback_query_handler(func=lambda call: call.data in highprice_calldata.city_callback_data)
+@bot.callback_query_handler(func=lambda call: call.data in bestdeal_calldata.city_callback_data)
 def highprice_clarification_city(call: CallbackQuery):
     chat_id = call.message.chat.id
     user_id = call.from_user.id
@@ -112,10 +112,10 @@ def highprice_second_calendar_date(call):
                               message_id=call.message.message_id)
         bot.send_message(text=f"Введите кол-во отелей, которые необходимо вывести: ",
                          chat_id=chat_id,
-                         reply_markup=highprice.quan_hotels_keyboard())
+                         reply_markup=bestdeal.quan_hotels_keyboard())
 
 
-@bot.callback_query_handler(func=lambda call: call.data in highprice_calldata.quan_hotels_callback_data())
+@bot.callback_query_handler(func=lambda call: call.data in bestdeal_calldata.quan_hotels_callback_data())
 def highprice_get_num_hotels(call: CallbackQuery):
     chat_id = call.message.chat.id
     user_id = call.from_user.id
@@ -130,15 +130,15 @@ def highprice_get_num_hotels(call: CallbackQuery):
     bot.edit_message_text(text="Нужно-ли выводить фотографий для каждого отеля («Да/Нет»)",
                           chat_id=chat_id,
                           message_id=call.message.message_id,
-                          reply_markup=highprice.is_need_photos_keyboard())
+                          reply_markup=bestdeal.is_need_photos_keyboard())
 
 
-@bot.callback_query_handler(func=lambda call: call.data in highprice_calldata.is_need_photos_callback_data())
+@bot.callback_query_handler(func=lambda call: call.data in bestdeal_calldata.is_need_photos_callback_data())
 def highprice_need_photos(call: CallbackQuery):
     chat_id = call.message.chat.id
     text = call.data
 
-    if text == "yes2":
+    if text == "yes3":
         with bot.retrieve_data(call.from_user.id, chat_id) as data:
             data["need_photo"] = True
             bot.set_state(call.from_user.id, UserInfoState.quan_photo, chat_id)
@@ -146,15 +146,15 @@ def highprice_need_photos(call: CallbackQuery):
         bot.edit_message_text(text="Сколько фото нужно?",
                               chat_id=chat_id,
                               message_id=call.message.message_id,
-                              reply_markup=highprice.quan_photos_keyboard())
-    elif text == "no2":
+                              reply_markup=bestdeal.quan_photos_keyboard())
+    elif text == "no3":
         with bot.retrieve_data(call.from_user.id, chat_id) as data:
             data["need_photo"] = False
             data["quan_photo"] = 0
-        final_highprice_data_handler(call)
+        final_bestdeal_data_handler(call)
 
 
-@bot.callback_query_handler(func=lambda call: call.data in highprice_calldata.quan_photos_callback_data())
+@bot.callback_query_handler(func=lambda call: call.data in bestdeal_calldata.quan_photos_callback_data())
 def highprice_quan_photos(call: CallbackQuery):
     chat_id = call.message.chat.id
 
@@ -163,10 +163,10 @@ def highprice_quan_photos(call: CallbackQuery):
             data["quan_photo"] = int(call.data[1] + call.data[2])
         else:
             data["quan_photo"] = int(call.data[1])
-    final_highprice_data_handler(call)
+    final_bestdeal_data_handler(call)
 
 
-def final_highprice_data_handler(call):
+def final_bestdeal_data_handler(call):
     chat_id = call.message.chat.id
 
     with bot.retrieve_data(call.from_user.id, chat_id) as data:

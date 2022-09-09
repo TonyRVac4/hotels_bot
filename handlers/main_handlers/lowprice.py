@@ -5,8 +5,7 @@ from telebot.types import Message
 from telebot.types import CallbackQuery
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 from loader import bot
-from keyboards.inline import lowprice
-from keyboards.inline import lowprice_calldata
+from keyboards.inline import lowprice, lowprice_calldata
 from states.contact_info import UserInfoState
 from requests_to_api.searchers import find_cites, find_hotels, find_photos
 
@@ -37,7 +36,7 @@ def get_city(message: Message):
         bot.register_next_step_handler(message, get_city)
 
 
-@bot.callback_query_handler(func=lambda call: call.data in lowprice_calldata.lowprice_city_callback_data)
+@bot.callback_query_handler(func=lambda call: call.data in lowprice_calldata.city_callback_data)
 def clarification_city(call: CallbackQuery):
     chat_id = call.message.chat.id
     user_id = call.from_user.id
