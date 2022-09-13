@@ -48,7 +48,7 @@ def find_hotels(id, checkIn, checkOut, quan_hotels, sorting):
     url = "https://hotels4.p.rapidapi.com/properties/list"
     querystring = {"destinationId": id, "pageNumber": "1", "pageSize": "25",
                    "checkIn": checkIn, "checkOut": checkOut, "adults1": "1",
-                   "sortOrder": sorting, "locale": "en_US", "currency": "USD"}
+                   "sortOrder": sorting, "locale": "ru_RU", "currency": "RUB"}
     hotels = list()
 
     try:
@@ -63,7 +63,7 @@ def find_hotels(id, checkIn, checkOut, quan_hotels, sorting):
                     if len(hotels) < quan_hotels and "streetAddress" in i_hotel["address"].keys():
                         hotels.append({"hotel_name": i_hotel["name"],
                                        "address": i_hotel["address"]["streetAddress"],
-                                       # добавить: как далеко расположен от центра
+                                       "center_location": i_hotel["landmarks"][0]["distance"],
                                        "price_per_day": i_hotel["ratePlan"]["price"]["current"],
                                        "full_price": int(i_hotel["ratePlan"]["price"]["exactCurrent"] * quan_day),
                                        "quan_day": quan_day,

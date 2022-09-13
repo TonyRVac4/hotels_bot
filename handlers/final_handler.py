@@ -1,4 +1,3 @@
-import re
 from telebot import types
 from loader import bot
 from requests_to_api.searchers import find_hotels, find_photos
@@ -28,12 +27,14 @@ def final_data_handler(call, sorting):
 
                 message = "🏨Отель: {hotel_name}\n🏠Адрес: {address}\n" \
                           "💵Стоимость за сутки: {day_price}\n" \
-                          "💰Стоимость за {quan_day} суток: ${full_price}\n" \
+                          "💰Стоимость за {quan_day} суток: {full_price} RUB\n" \
+                          "📏Расстояние до центра: {center_location}\n"\
                           "🌐Ссылка на сайт: {site}".format(hotel_name=hotel["hotel_name"],
                                                            address=hotel["address"],
                                                            day_price=hotel["price_per_day"],
                                                            quan_day=hotel["quan_day"],
-                                                           full_price=hotel["full_price"],
+                                                           full_price="{:,}".format(hotel["full_price"]),
+                                                           center_location=hotel["center_location"],
                                                            site=hotel_url)
                 if data["need_photo"]:
                     photos = find_photos(hotel=hotel, quan_photo=data["quan_photo"])
@@ -43,7 +44,7 @@ def final_data_handler(call, sorting):
                             bot.send_media_group(chat_id=chat_id, media=photos_for_send)
                             bot.send_message(text=message, chat_id=chat_id, disable_web_page_preview=True)
                         else:
-                            bot.send_photo(chat_id=chat_id, photo=photos[0], caption=message, disable_web_page_preview=True)
+                            bot.send_photo(chat_id=chat_id, photo=photos[0], caption=message)
                     else:
                         bot.send_message(text="Фотографии не найдены\n{}".format(message), chat_id=chat_id, disable_web_page_preview=True)
                 else:
