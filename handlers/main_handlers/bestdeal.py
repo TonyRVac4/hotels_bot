@@ -1,13 +1,13 @@
 import re
 import datetime
-from telebot import types
 from telebot.types import Message
 from telebot.types import CallbackQuery
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 from loader import bot
 from keyboards.inline import bestdeal, bestdeal_calldata
 from states.contact_info import UserInfoState
-from requests_to_api.searchers import find_cites, find_hotels, find_photos
+from requests_to_api.searchers import find_cites
+from handlers.final_handler import final_data_handler
 
 
 @bot.message_handler(commands=['bestdeal'])
@@ -38,6 +38,7 @@ def highprice_get_city(message: Message):
 # Добавить:
 #  Диапазон цен.
 # Диапазон расстояния, на котором находится отель от центра.
+
 
 @bot.callback_query_handler(func=lambda call: call.data in bestdeal_calldata.city_callback_data)
 def highprice_clarification_city(call: CallbackQuery):
@@ -154,7 +155,7 @@ def highprice_need_photos(call: CallbackQuery):
         with bot.retrieve_data(call.from_user.id, chat_id) as data:
             data["need_photo"] = False
             data["quan_photo"] = 0
-        final_bestdeal_data_handler(call)
+        final_data_handler(call)
 
 
 @bot.callback_query_handler(func=lambda call: call.data in bestdeal_calldata.quan_photos_callback_data())
@@ -166,54 +167,4 @@ def highprice_quan_photos(call: CallbackQuery):
             data["quan_photo"] = int(call.data[1] + call.data[2])
         else:
             data["quan_photo"] = int(call.data[1])
-    final_bestdeal_data_handler(call)
-
-
-def final_bestdeal_data_handler(call):
-    chat_id = call.message.chat.id
-
-    with bot.retrieve_data(call.from_user.id, chat_id) as data:
-        bot.edit_message_text(text="Ожидайте, подбираем отели...",
-                              chat_id=chat_id,
-                              message_id=call.message.message_id,
-                              reply_markup=None)
-
-        hotels = find_hotels(id=data["dest_id"],
-                             checkIn=data["checkIn"],
-                             checkOut=data["checkOut"],
-                             quan_hotels=data["quan_hotels"],
-                             sorting="PRICE_HIGHEST_FIRST")
-
-        if hotels:
-            bot.edit_message_text(text=f"Вот что удалось найти:",
-                                  chat_id=chat_id,
-                                  message_id=call.message.message_id)
-
-            for hotel in hotels:
-                hotel_url = 'https://hotels.com/ho{}'.format(str(hotel["destination_id"]))
-
-                full_price = hotel["full_price"].split(" ")
-                quan_day = re.match(r"\d+", full_price[3])
-                quan_day = quan_day.group()
-                message = "🏨Отель: {hotel_name}\n🏠Адрес: {address}\n" \
-                          "💵Стоимость за сутки: {day_price}\n" \
-                          "💰Стоимость за {quan_day} суток: {full_price}\n" \
-                          "🌐Ссылка на сайт: {site}".format(hotel_name=hotel["hotel_name"],
-                                                           address=hotel["address"],
-                                                           day_price=hotel["price_per_day"],
-                                                           quan_day=quan_day,
-                                                           full_price=full_price[1],
-                                                           site=hotel_url)
-                if data["need_photo"]:
-                    photos = find_photos(hotel=hotel, quan_photo=data["quan_photo"])
-                    if len(photos) >= 2:
-                        photos_for_send = [types.InputMediaPhoto(media=path) for path in photos]
-                        bot.send_media_group(chat_id=chat_id, media=photos_for_send)
-                        bot.send_message(text=message, chat_id=chat_id, disable_web_page_preview=True)
-                    else:
-                        bot.send_photo(chat_id=chat_id, photo=photos[0], caption=message, disable_web_page_preview=True)
-                else:
-                    bot.send_message(text=message, chat_id=chat_id, disable_web_page_preview=True)
-        else:
-            bot.send_message(text="Отели не найдены",
-                             chat_id=chat_id)
+    final_data_handler(call)
