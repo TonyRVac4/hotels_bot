@@ -35,6 +35,9 @@ def highprice_get_city(message: Message):
                          chat_id=chat_id)
         bot.register_next_step_handler(message, highprice_get_city)
 
+# Добавить:
+#  Диапазон цен.
+# Диапазон расстояния, на котором находится отель от центра.
 
 @bot.callback_query_handler(func=lambda call: call.data in bestdeal_calldata.city_callback_data)
 def highprice_clarification_city(call: CallbackQuery):
@@ -186,22 +189,22 @@ def final_bestdeal_data_handler(call):
                                   chat_id=chat_id,
                                   message_id=call.message.message_id)
 
-            if data["need_photo"]:
-                for hotel in hotels:
-                    hotel_url = 'https://hotels.com/ho{hotel_id}'.replace("{hotel_id}", str(hotel["destination_id"]))
+            for hotel in hotels:
+                hotel_url = 'https://hotels.com/ho{}'.format(str(hotel["destination_id"]))
 
-                    full_price = hotel["full_price"].split(" ")
-                    quan_day = re.match(r"\d+", full_price[3])
-                    quan_day = quan_day.group()
-                    message = "🏨Отель: {hotel_name}\n🏠Адрес: {address}\n" \
-                              "💵Стоимость за сутки: {day_price}\n" \
-                              "💰Стоимость за {quan_day} суток: {full_price}\n" \
-                              "🌐Ссылка на сайт: {site}".format(hotel_name=hotel["hotel_name"],
-                                                               address=hotel["address"],
-                                                               day_price=hotel["price_per_day"],
-                                                               quan_day=quan_day,
-                                                               full_price=full_price[1],
-                                                               site=hotel_url)
+                full_price = hotel["full_price"].split(" ")
+                quan_day = re.match(r"\d+", full_price[3])
+                quan_day = quan_day.group()
+                message = "🏨Отель: {hotel_name}\n🏠Адрес: {address}\n" \
+                          "💵Стоимость за сутки: {day_price}\n" \
+                          "💰Стоимость за {quan_day} суток: {full_price}\n" \
+                          "🌐Ссылка на сайт: {site}".format(hotel_name=hotel["hotel_name"],
+                                                           address=hotel["address"],
+                                                           day_price=hotel["price_per_day"],
+                                                           quan_day=quan_day,
+                                                           full_price=full_price[1],
+                                                           site=hotel_url)
+                if data["need_photo"]:
                     photos = find_photos(hotel=hotel, quan_photo=data["quan_photo"])
                     if len(photos) >= 2:
                         photos_for_send = [types.InputMediaPhoto(media=path) for path in photos]
@@ -209,22 +212,7 @@ def final_bestdeal_data_handler(call):
                         bot.send_message(text=message, chat_id=chat_id, disable_web_page_preview=True)
                     else:
                         bot.send_photo(chat_id=chat_id, photo=photos[0], caption=message, disable_web_page_preview=True)
-            else:
-                for hotel in hotels:
-                    hotel_url = 'https://hotels.com/ho{hotel_id}'.replace("{hotel_id}", str(hotel["destination_id"]))
-
-                    full_price = hotel["full_price"].split(" ")
-                    quan_day = re.match(r"\d+", full_price[3])
-                    quan_day = quan_day.group()
-                    message = "🏨Отель: {hotel_name}\n🏠Адрес: {address}\n" \
-                              "💵Стоимость за сутки: {day_price}\n" \
-                              "💰Стоимость за {quan_day} суток: {full_price}\n" \
-                              "🌐Ссылка на сайт: {site}".format(hotel_name=hotel["hotel_name"],
-                                                               address=hotel["address"],
-                                                               day_price=hotel["price_per_day"],
-                                                               quan_day=quan_day,
-                                                               full_price=full_price[1],
-                                                               site=hotel_url)
+                else:
                     bot.send_message(text=message, chat_id=chat_id, disable_web_page_preview=True)
         else:
             bot.send_message(text="Отели не найдены",
