@@ -3,7 +3,7 @@ import json
 from config_data.config import headers
 from requests_to_api.api_request import main_request
 from loguru import logger
-
+from utils.misc.sorters import bestdeal_sorting
 
 logger.add('logs/searchers.log', level='DEBUG')
 
@@ -44,7 +44,7 @@ def find_cites(city):
         return None
 
 
-def find_hotels(id, checkIn, checkOut, quan_hotels, sorting):
+def find_hotels(id, checkIn, checkOut, quan_hotels, sorting, command=None, price_range=None, distance_range=None):
     url = "https://hotels4.p.rapidapi.com/properties/list"
     querystring = {"destinationId": id, "pageNumber": "1", "pageSize": "25",
                    "checkIn": checkIn, "checkOut": checkOut, "adults1": "1",
@@ -58,8 +58,15 @@ def find_hotels(id, checkIn, checkOut, quan_hotels, sorting):
         if find:
             data = json.loads(f"{{{find[0]}}}")
             if data['results']:
+                if command == "/bestdeal":
+                    sorted_data = bestdeal_sorting(data=data['results'],
+                                                   price_range=price_range,
+                                                   distance_range=distance_range)
+                else:
+                    sorted_data = data['results']
+
                 quan_day = (checkOut - checkIn).days
-                for i_hotel in data['results']:
+                for i_hotel in sorted_data:
                     if len(hotels) < quan_hotels and "streetAddress" in i_hotel["address"].keys():
                         hotels.append({"hotel_name": i_hotel["name"],
                                        "address": i_hotel["address"]["streetAddress"],

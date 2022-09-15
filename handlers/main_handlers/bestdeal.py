@@ -12,6 +12,7 @@ from handlers.final_handler import final_data_handler
 
 @bot.message_handler(commands=['bestdeal'])
 def best_deal(message: Message):
+    print("bestdeal")
     chat_id = message.chat.id
 
     bot.send_message(text="Введите на русском Город, где хотите найти отель:",
@@ -51,8 +52,7 @@ def bestdeal_clarification_city(call: CallbackQuery):
     bot.edit_message_text(text=f"Район: {call_data.group(1)}",
                           chat_id=chat_id,
                           message_id=call.message.message_id)
-    bot.send_message(chat_id, text="Уточни диапазон цен(RUB):\n(Пример: 1000-2000, 1000 2000)")
-    print(1)
+    bot.send_message(chat_id, text="Уточни диапазон цен(RUB):\n(Пример: 5000-15000, 5000 15000)")
     bot.register_next_step_handler(call.message, price_range)
 
 
@@ -66,14 +66,14 @@ def price_range(message: Message):
         call_data = re.search(pattern, message.text)
 
         if call_data:
-            data["price_range"] = message.text
+            data["price_range"] = f"{call_data.group(1)}-{call_data.group(2)}"
             bot.set_state(user_id=user_id, state=UserInfoState.distance_range, chat_id=chat_id)
 
-            bot.send_message(chat_id, text="Уточни диапазон расстояний от центра(км):\n(Пример: 4-10, 4 10)")
+            bot.send_message(chat_id, text="Уточни диапазон расстояний от центра(км):\n(Пример: 1-10, 1 10)")
             bot.register_next_step_handler(message, distance_range)
         else:
             bot.send_message(text=f"Ошибка! Неправильный формат диапазона цен!\n"
-                                  f"(Пример: 1000-2000, 1000 2000)\n"
+                                  f"(Пример: 5000-15000, 5000 15000)\n"
                                   f"Введите диапазон цен(RUB):",
                              chat_id=chat_id)
             bot.register_next_step_handler(message, price_range)
@@ -87,8 +87,9 @@ def distance_range(message: Message):
     with bot.retrieve_data(user_id=user_id, chat_id=chat_id) as data:
         pattern = r"(\d{1,3})[- ](\d{1,3})"
         call_data = re.search(pattern, message.text)
+
         if call_data:
-            data["distance_range"] = message.text
+            data["distance_range"] = f"{call_data.group(1)}-{call_data.group(2)}"
             bot.set_state(user_id=user_id, state=UserInfoState.checkIn, chat_id=chat_id)
 
             cur_date = datetime.date.today() + datetime.timedelta(days=1)
@@ -98,7 +99,7 @@ def distance_range(message: Message):
                              reply_markup=calendar)
         else:
             bot.send_message(text=f"Ошибка! Неправильный формат диапазона расстояний!\n"
-                                  f"(Пример: 4-10, 4 10)\n"
+                                  f"(Пример: 1-10, 1 10)\n"
                                   f"Введите диапазон расстояний(км):",
                              chat_id=chat_id)
             bot.register_next_step_handler(message, distance_range)
@@ -196,7 +197,7 @@ def bestdeal_need_photos(call: CallbackQuery):
         with bot.retrieve_data(call.from_user.id, chat_id) as data:
             data["need_photo"] = False
             data["quan_photo"] = 0
-        final_data_handler(call, sorting=None)
+        final_data_handler(call, sorting="DISTANCE_FROM_LANDMARK", command="/bestdeal")
 
 
 @bot.callback_query_handler(func=lambda call: call.data in bestdeal_calldata.quan_photos_callback_data())
@@ -208,4 +209,4 @@ def bestdeal_quan_photos(call: CallbackQuery):
             data["quan_photo"] = int(call.data[1] + call.data[2])
         else:
             data["quan_photo"] = int(call.data[1])
-    final_data_handler(call, sorting=None)
+    final_data_handler(call, sorting="DISTANCE_FROM_LANDMARK", command="/bestdeal")

@@ -3,7 +3,7 @@ from loader import bot
 from requests_to_api.searchers import find_hotels, find_photos
 
 
-def final_data_handler(call, sorting):
+def final_data_handler(call, sorting, command=None):
     chat_id = call.message.chat.id
 
     with bot.retrieve_data(call.from_user.id, chat_id) as data:
@@ -11,11 +11,23 @@ def final_data_handler(call, sorting):
                               chat_id=chat_id,
                               message_id=call.message.message_id,
                               reply_markup=None)
-        hotels = find_hotels(id=data["dest_id"],
-                             checkIn=data["checkIn"],
-                             checkOut=data["checkOut"],
-                             quan_hotels=data["quan_hotels"],
-                             sorting=sorting)
+
+        if command == "/bestdeal":
+            hotels = find_hotels(id=data["dest_id"],
+                                 checkIn=data["checkIn"],
+                                 checkOut=data["checkOut"],
+                                 quan_hotels=data["quan_hotels"],
+                                 sorting=sorting,
+                                 command=command,
+                                 price_range=data["price_range"],
+                                 distance_range=data["distance_range"])
+        else:
+            hotels = find_hotels(id=data["dest_id"],
+                                 checkIn=data["checkIn"],
+                                 checkOut=data["checkOut"],
+                                 quan_hotels=data["quan_hotels"],
+                                 sorting=sorting,
+                                 command=command)
 
         if hotels:
             bot.edit_message_text(text=f"Вот что удалось найти:",
