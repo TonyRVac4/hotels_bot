@@ -9,5 +9,5 @@ class UserInfoState(StatesGroup):
     quan_hotels = State()
     need_photo = State()
     quan_photo = State()
-
-
+    price_range = State()
+    distance_range = State()

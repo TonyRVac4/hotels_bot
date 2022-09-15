@@ -1,6 +1,6 @@
 from telebot import types
 from telebot.types import InlineKeyboardMarkup
-from keyboards.inline.highprice_calldata import highprice_city_callback_data
+from keyboards.inline.highprice_calldata import city_callback_data
 
 
 def quan_hotels_keyboard() -> InlineKeyboardMarkup:
@@ -46,10 +46,10 @@ def is_need_photos_keyboard() -> InlineKeyboardMarkup:
 def city_markup(cities) -> InlineKeyboardMarkup:  # : List[Dict[str: str]]
     destinations = InlineKeyboardMarkup()
 
-    highprice_city_callback_data.clear()
+    city_callback_data.clear()
     for city in cities:
         call_data = f'2{city["city_name"]}{city["destination_id"]}'
-        highprice_city_callback_data.append(call_data)
+        city_callback_data.append(call_data)
         destinations.add(types.InlineKeyboardButton(text=city['city_name'],
                                                     callback_data=call_data))
     return destinations

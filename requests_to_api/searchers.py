@@ -3,7 +3,7 @@ import json
 from config_data.config import headers
 from requests_to_api.api_request import main_request
 from loguru import logger
-
+from utils.misc.sorters import bestdeal_sorting
 
 logger.add('logs/searchers.log', level='DEBUG')
 
@@ -44,11 +44,12 @@ def find_cites(city):
         return None
 
 
-def find_hotels(id, checkIn, checkOut, quan_hotels, sorting):
+def find_hotels(id, checkIn, checkOut, quan_hotels, sorting, command=None, price_range=None, distance_range=None):
     url = "https://hotels4.p.rapidapi.com/properties/list"
     querystring = {"destinationId": id, "pageNumber": "1", "pageSize": "25",
                    "checkIn": checkIn, "checkOut": checkOut, "adults1": "1",
-                   "sortOrder": sorting, "locale": "en_US", "currency": "USD"}
+                   "sortOrder": sorting, "locale": "ru_RU", "currency": "RUB"}
+    hotels = list()
 
     try:
         response = main_request(url=url, headers=headers, params=querystring)
@@ -57,26 +58,23 @@ def find_hotels(id, checkIn, checkOut, quan_hotels, sorting):
         if find:
             data = json.loads(f"{{{find[0]}}}")
             if data['results']:
-                hotels = list()
-                if len(data['results']) >= quan_hotels:
-                    for i_hotel in data['results']:
-                        if len(hotels) < quan_hotels and "streetAddress" in i_hotel["address"].keys():
-                            hotels.append({"hotel_name": i_hotel["name"],
-                                           "address": i_hotel["address"]["streetAddress"],
-                                           # добавить: как далеко расположен от центра
-                                           "price_per_day": i_hotel["ratePlan"]["price"]["current"],
-                                           "full_price": i_hotel["ratePlan"]["price"]["fullyBundledPricePerStay"],
-                                           "destination_id": i_hotel["id"]})
+                if command == "/bestdeal":
+                    sorted_data = bestdeal_sorting(data=data['results'],
+                                                   price_range=price_range,
+                                                   distance_range=distance_range)
                 else:
-                    for i_hotel in data['results']:
-                        if i_hotel["address"]["streetAddress"]:
-                            hotels.append({"hotel_name": i_hotel["name"],
-                                           "address": i_hotel["address"]["streetAddress"],
-                                           # добавить: как далеко расположен от центра
-                                           "price_per_day": i_hotel["ratePlan"]["price"]["current"],
-                                           "full_price": i_hotel["ratePlan"]["price"]["fullyBundledPricePerStay"],
-                                           "destination_id": i_hotel["id"]})
-                return hotels
+                    sorted_data = data['results']
+
+                quan_day = (checkOut - checkIn).days
+                for i_hotel in sorted_data:
+                    if len(hotels) < quan_hotels and "streetAddress" in i_hotel["address"].keys():
+                        hotels.append({"hotel_name": i_hotel["name"],
+                                       "address": i_hotel["address"]["streetAddress"],
+                                       "center_location": i_hotel["landmarks"][0]["distance"],
+                                       "price_per_day": i_hotel["ratePlan"]["price"]["current"],
+                                       "full_price": int(i_hotel["ratePlan"]["price"]["exactCurrent"] * quan_day),
+                                       "quan_day": quan_day,
+                                       "destination_id": i_hotel["id"]})
             else:
                 raise ValueError(f"Ошибка поиска отелей\n"
                                  f"destinationId: {id} | find = {find} | response code: {response.status_code}\n")
@@ -85,35 +83,33 @@ def find_hotels(id, checkIn, checkOut, quan_hotels, sorting):
                              f"destinationId: {id} | find = {find} | response code: {response.status_code}\n")
     except ValueError as exp:
         logger.debug(exp)
-        return None
     except Exception as exp:
         logger.debug(exp)
-        return None
+    finally:
+        return hotels
 
 
 def find_photos(hotel: dict, quan_photo: int):
     url = "https://hotels4.p.rapidapi.com/properties/get-hotel-photos"
+    hotels_url = list()
 
     try:
         querystring = {"id": hotel["destination_id"]}
         response = main_request(url=url, headers=headers, params=querystring)
         find = json.loads(response.text)
-        hotels_url = list()
         if find["hotelImages"]:
-            for count, i_photo in enumerate(find["hotelImages"]):
-                if count < quan_photo:
-                    url = i_photo["baseUrl"].replace("{size}", "w")
+            for photo in find["hotelImages"]:
+                if len(hotels_url) < quan_photo:
+                    url = photo["baseUrl"].replace("{size}", "w")
                     hotels_url.append(url)
                 else:
                     break
-
-            return hotels_url
         else:
             raise ValueError(f"Ошибка поиска фотографий\n"
                              f"hotel = {hotel} | find = {find} | response code: {response.status_code}\n")
     except ValueError as exp:
         logger.debug(exp)
-        return None
     except Exception as exp:
         logger.debug(exp)
-        return None
+    finally:
+        return hotels_url
