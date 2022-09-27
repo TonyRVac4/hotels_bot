@@ -7,6 +7,7 @@ else:
     load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
+DATA_BASE_PATH = os.getenv('PATH_TO_DB')
 headers = {
     "X-RapidAPI-Key": os.getenv('RAPID_API_KEY'),
     "X-RapidAPI-Host": "hotels4.p.rapidapi.com"

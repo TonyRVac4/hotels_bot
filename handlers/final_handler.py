@@ -1,6 +1,7 @@
 from telebot import types
 from loader import bot
 from requests_to_api.searchers import find_hotels, find_photos
+from database.models import Users, Hotels, db
 
 
 def final_data_handler(call, sorting, command=None):
@@ -30,6 +31,9 @@ def final_data_handler(call, sorting, command=None):
                                  command=command)
 
         if hotels:
+            with db:
+                Hotels.create(user_id='Null', hotel_info=command)
+
             bot.edit_message_text(text=f"Вот что удалось найти:",
                                   chat_id=chat_id,
                                   message_id=call.message.message_id)
@@ -48,6 +52,9 @@ def final_data_handler(call, sorting, command=None):
                                                            full_price="{:,}".format(hotel["full_price"]),
                                                            center_location=hotel["center_location"],
                                                            site=hotel_url)
+                with db:
+                    Hotels.create(user_id=call.from_user.id, hotel_info=f"Город: {data['city']}\n{message}")
+
                 if data["need_photo"]:
                     photos = find_photos(hotel=hotel, quan_photo=data["quan_photo"])
                     if photos:

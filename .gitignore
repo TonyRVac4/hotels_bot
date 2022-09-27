@@ -130,5 +130,6 @@ dmypy.json
 .idea/*
 .env
 database/.DS_Store
+database/main_database.db
 .DS_Store
 logs

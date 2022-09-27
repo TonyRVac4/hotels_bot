@@ -56,7 +56,7 @@ def bestdeal_clarification_city(call: CallbackQuery):
     bot.register_next_step_handler(call.message, price_range)
 
 
-@bot.message_handler(content_types=['text'])
+@bot.message_handler(commands=['867539087858'])
 def price_range(message: Message):
     chat_id = message.chat.id
     user_id = message.from_user.id
@@ -79,7 +79,7 @@ def price_range(message: Message):
             bot.register_next_step_handler(message, price_range)
 
 
-@bot.message_handler(content_types=['text'])
+@bot.message_handler(commands=['868765868'])
 def distance_range(message: Message):
     chat_id = message.chat.id
     user_id = message.from_user.id

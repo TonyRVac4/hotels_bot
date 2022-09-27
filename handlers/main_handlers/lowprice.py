@@ -151,7 +151,7 @@ def need_photos(call: CallbackQuery):
         with bot.retrieve_data(call.from_user.id, chat_id) as data:
             data["need_photo"] = False
             data["quan_photo"] = 0
-        final_data_handler(call, sorting="PRICE")
+        final_data_handler(call, sorting="PRICE", command="lowprice")
 
 
 @bot.callback_query_handler(func=lambda call: call.data in lowprice_calldata.quan_photos_callback_data())
@@ -163,4 +163,4 @@ def quan_photos(call: CallbackQuery):
             data["quan_photo"] = int(call.data[1] + call.data[2])
         else:
             data["quan_photo"] = int(call.data[1])
-    final_data_handler(call, sorting="PRICE")
+    final_data_handler(call, sorting="PRICE", command="lowprice")
