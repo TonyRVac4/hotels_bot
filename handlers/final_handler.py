@@ -13,7 +13,7 @@ def final_data_handler(call, sorting, command=None):
                               message_id=call.message.message_id,
                               reply_markup=None)
 
-        if command == "/bestdeal":
+        if command == "bestdeal":
             hotels = find_hotels(id=data["dest_id"],
                                  checkIn=data["checkIn"],
                                  checkOut=data["checkOut"],
@@ -34,6 +34,10 @@ def final_data_handler(call, sorting, command=None):
             bot.edit_message_text(text=f"Вот что удалось найти:",
                                   chat_id=chat_id,
                                   message_id=call.message.message_id)
+
+            with db:
+                Hotels.create(user_id=call.from_user.id,
+                              hotel_info=f"Команда: {command}")
 
             for hotel in hotels:
                 hotel_url = 'https://hotels.com/ho{}'.format(str(hotel["destination_id"]))
