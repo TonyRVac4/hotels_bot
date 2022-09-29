@@ -1,7 +1,7 @@
 from telebot import types
 from loader import bot
 from requests_to_api.searchers import find_hotels, find_photos
-from database.models import Users, Hotels, db
+from database.models import Hotels, db
 
 
 def final_data_handler(call, sorting, command=None):
@@ -31,9 +31,6 @@ def final_data_handler(call, sorting, command=None):
                                  command=command)
 
         if hotels:
-            with db:
-                Hotels.create(user_id='Null', hotel_info=command)
-
             bot.edit_message_text(text=f"Вот что удалось найти:",
                                   chat_id=chat_id,
                                   message_id=call.message.message_id)

@@ -10,16 +10,6 @@ class BaseModel(Model):
         database = db
 
 
-class Users(BaseModel):
-    name = CharField()
-    user_id = IntegerField()
-
-
 class Hotels(BaseModel):
     user_id = IntegerField()
     hotel_info = TextField()
-
-
-def create_tables():
-    Users.create_table()
-    Hotels.create_table()
