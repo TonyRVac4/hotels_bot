@@ -12,7 +12,6 @@ from handlers.final_handler import final_data_handler
 
 @bot.message_handler(commands=['bestdeal'])
 def best_deal(message: Message):
-    print("bestdeal")
     chat_id = message.chat.id
 
     bot.send_message(text="Введите на русском Город, где хотите найти отель:",
@@ -56,7 +55,7 @@ def bestdeal_clarification_city(call: CallbackQuery):
     bot.register_next_step_handler(call.message, price_range)
 
 
-@bot.message_handler(content_types=['text'])
+@bot.message_handler(commands=['867539087858'])
 def price_range(message: Message):
     chat_id = message.chat.id
     user_id = message.from_user.id
@@ -79,7 +78,7 @@ def price_range(message: Message):
             bot.register_next_step_handler(message, price_range)
 
 
-@bot.message_handler(content_types=['text'])
+@bot.message_handler(commands=['868765868'])
 def distance_range(message: Message):
     chat_id = message.chat.id
     user_id = message.from_user.id
@@ -197,7 +196,7 @@ def bestdeal_need_photos(call: CallbackQuery):
         with bot.retrieve_data(call.from_user.id, chat_id) as data:
             data["need_photo"] = False
             data["quan_photo"] = 0
-        final_data_handler(call, sorting="DISTANCE_FROM_LANDMARK", command="/bestdeal")
+        final_data_handler(call, sorting="DISTANCE_FROM_LANDMARK", command="bestdeal")
 
 
 @bot.callback_query_handler(func=lambda call: call.data in bestdeal_calldata.quan_photos_callback_data())
@@ -209,4 +208,4 @@ def bestdeal_quan_photos(call: CallbackQuery):
             data["quan_photo"] = int(call.data[1] + call.data[2])
         else:
             data["quan_photo"] = int(call.data[1])
-    final_data_handler(call, sorting="DISTANCE_FROM_LANDMARK", command="/bestdeal")
+    final_data_handler(call, sorting="DISTANCE_FROM_LANDMARK", command="bestdeal")
