@@ -10,7 +10,7 @@
 
 
 <!-- ABOUT THE PROJECT -->
-## About The Project
+### About The Project
 
 Telegram bot for hotel search. [API Hotels](https://rapidapi.com/apidojo/api/hotels4) is used to get data about hotels.
 
@@ -23,9 +23,17 @@ Telegram bot for hotel search. [API Hotels](https://rapidapi.com/apidojo/api/hot
 * [![Loguru][Loguru.com]][Loguru-url]
 
 
+<!-- Features -->
+### Features
+
+* `/help` - Displays information about commands
+* `/lowprice` - Displays the cheapest hotels in the city
+* `/highprice` - Displays the most expensive hotels in the city
+* `/bestdeal` - Displays the hotels that are most suitable for the price and location from the center
+* `/history` - Displays hotel search history
+
 
 <!-- GETTING STARTED -->
-
 ### Installation
 
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
@@ -50,14 +58,15 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
 
 
 <!-- USAGE EXAMPLES -->
-## Usage
+### Usage
 Run the file `main.py ` to start the bot.
 
-[PyTelegramBotApi.com]: https://img.shields.io/badge/PyTelegramBotApi-0769AD?style=for-the-badge
+
+[PyTelegramBotApi.com]: https://img.shields.io/badge/PyTelegramBotApi-000000?style=for-the-badge
 [PyTelegramBotApi-url]: https://pypi.org/project/pyTelegramBotAPI
-[peewee.com]: https://img.shields.io/badge/peewee-c8269a?style=for-the-badge
+[peewee.com]: https://img.shields.io/badge/peewee-20232A?style=for-the-badge
 [peewee-url]: https://docs.peewee-orm.com/en/latest/
-[PyTelegramBotCalendar.com]: https://img.shields.io/badge/PyTelegramBotCalendar-000000?style=for-the-badge
+[PyTelegramBotCalendar.com]: https://img.shields.io/badge/PyTelegramBotCalendar-35495E?style=for-the-badge
 [PyTelegramBotCalendar-url]: https://github.com/artembakhanov/python-telegram-bot-calendar
 [Loguru.com]: https://img.shields.io/badge/Loguru-ffffff?style=for-the-badge
 [Loguru-url]: https://github.com/Delgan/loguru#readme
